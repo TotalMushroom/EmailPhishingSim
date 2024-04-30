@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spot the Phishing Email Game</title>
+<style>
+/* Style enhancements */
+body, html {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f8ff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+#gameContainer {
+    width: 80%;
+    max-width: 600px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
+#emailDisplay {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    text-align: left;
+    height: 200px;
+    overflow-y: auto;
+    font-size: 14px;
+    color: #333;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    white-space: pre-wrap; /* Maintains whitespace formatting */
+}
+button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 10px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+button:hover {
+    background-color: #45a049;
+}
+form {
+    text-align: center;
+}
+.checkbox-container {
+    display: inline-block;
+    background: #f2f2f2;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+input[type="checkbox"] {
+    margin-right: 5px;
+}
+label {
+    display: block;
+    margin: 5px 0;
+}
+#scoreDisplay {
+    margin-top: 20px;
+    font-size: 20px;
+    color: #333;
+}
+</style>
+</head>
+<body>
+<div id="gameContainer">
+    <h2>Spot the Phishing Email</h2>
+    <div id="emailDisplay"></div>
+    <form id="traitsForm">
+        <div class="checkbox-container"><label><input type="checkbox" name="traits" value="urgency"> Urgency Displayed</label></div>
+        <div class="checkbox-container"><label><input type="checkbox" name="traits" value="suspiciousLink"> Suspicious Link</label></div>
+        <div class="checkbox-container"><label><input type="checkbox" name="traits" value="spellingMistakes"> Spelling Mistakes</label></div>
+        <div class="checkbox-container"><label><input type="checkbox" name="traits" value="genericGreeting"> Generic Greeting</label></div><br>
+        <button type="button" onclick="evaluateTraits()">Submit</button>
+        <button type="button" onclick="loadEmail()">Load New Email</button>
+    </form>
+    <div id="scoreDisplay"></div>
+</div>
+<script>
+const emails = [
+    {
+        content: "Dear valued customer,\\n\\nWe have noticed suspicious activity on your account. Please click the link below urgently to verify your identity:\\nhttp://verify-now.com\\n\\nIt is imperative for the security of your sensitive information. Do not ignore this alert.",
+        traits: ["urgency", "suspiciousLink"]
+    },
+    {
+        content: "Attention:\\n\\nYour account will be permanently disabled if you do not rectify the errors detected in your recent transactions. Visit immediately:\\nhttp://urgent-fix.com\\n\\nFailure to comply could result in serious consequences for your account status.",
+        traits: ["urgency", "suspiciousLink"]
+    },
+    {
+        content: "Hello dear,\\n\\nWe've noticed some strange activity on your profile. Could you please verify your account details by following this link?\\nhttp://confirm-now.org\\n\\nWe appreciate your cooperation to secure your account.",
+        traits: ["genericGreeting", "suspiciousLink"]
+    },
+    {
+        content: "Greetings,\\n\\nThere has been a problem with your payment information on our records. It is urgent that you update your details promptly at:\\nhttp://update-payment.com\\n\\nThis is essential to avoid any interruptions to your service.",
+        traits: ["urgency", "suspiciousLink"]
+    },
+    {
+        content: "Notice: \\n\\nYour subscription is set to expire within 24 hours. Renew now to avoid disruption of service. Click here: http://quick-renewal.com",
+        traits: ["urgency", "suspiciousLink"]
+    },
+    {
+        content: "Important Alert:\\n\\nWe've detected unusual sign-in activity on your account from a different location. Secure your account immediately at: http://security-alert.com",
+        traits: ["urgency", "suspiciousLink"]
+    },
+    {
+        content: "Howdy, \\n\\nDid you request a password reset? If not, secure your account right away by visiting our site: http://password-security.com",
+        traits: ["genericGreeting", "suspiciousLink"]
+    },
+    {
+        content: "Dear Customer, \\n\\nYou've won a prize! Claim your reward now by clicking this link: http://win-big-prize.com",
+        traits: ["urgency", "suspiciousLink", "genericGreeting"]
+    }
+];
+
+function loadEmail() {
+    const randomIndex = Math.floor(Math.random() * emails.length);
+    document.getElementById('emailDisplay').textContent = emails[randomIndex].content.replace(/\\n/g, '\n');
+    document.getElementById('emailDisplay').dataset.traits = emails[randomIndex].traits.join(',');
+    document.querySelectorAll('#traitsForm input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+        cb.parentElement.style.color = '';
+    });
+    document.getElementById('scoreDisplay').innerHTML = '';
+}
+
+function evaluateTraits() {
+    const selectedTraits = Array.from(document.querySelectorAll('#traitsForm input[type="checkbox"]:checked')).map(el => el.value);
+    const correctTraits = document.getElementById('emailDisplay').dataset.traits.split(',');
+    const score = selectedTraits.filter(trait => correctTraits.includes(trait)).length;
+    document.getElementById('scoreDisplay').innerHTML = `Score: ${score}/${correctTraits.length}`;
+    // Highlight correct traits
+    document.querySelectorAll('#traitsForm input[type="checkbox"]').forEach(cb => {
+        if (correctTraits.includes(cb.value)) {
+            cb.parentElement.style.color = 'green';
+        } else {
+            cb.parentElement.style.color = 'red';
+        }
+    });
+}
+
+window.onload = loadEmail;
+</script>
+</body>
+</html>
